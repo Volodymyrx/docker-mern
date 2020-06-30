@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  api:
+    build:
+      ./api
+    container_name: docker-mern-api
+    command: npm run start
+    restart: unless-stopped
+    environment:
+      - PORT=3000
+      - HOST=http://localhost
+      - MONGO_URL=mongodb://api_db:27017/api
+    ports:
+    - "3000:3000"
+    depends_on:
+      - api_db
+
+  auth:
+    build:
+      ./auth
+    container_name: docker-mern-auth
+    command: npm run start
+    restart: unless-stopped
+    environment:
+      - PORT=3005
+      - HOST=http://localhost
+      - MONGO_URL=mongodb://auth_db:27017/auth
+    ports:
+    - "3005:3005"
+    depends_on:
+      - auth_db
+
+
+  api_db:
+    image: mongo:latest
+    container_name: docker-mern-api-db
+    volumes:
+    - mongodb_api:/data/db
+
+  auth_db:
+    image: mongo:latest
+    container_name: docker-mern-auth-db
+    volumes:
+    - mongodb_auth:/data/db
+
+volumes:
+  mongodb_api:
+  mongodb_auth:
+
+
+
+
+
+
+
+
+
+
+
