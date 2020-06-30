@@ -1,6 +1,17 @@
 version: '3'
 
 services:
+  frontend:
+    build:
+      ./frontend
+    container_name: docker-mern-frontend
+    command: npm run start
+    restart: unless-stopped
+    ports:
+    - "3000:3000"
+
+
+
   api:
     build:
       ./api
@@ -8,11 +19,11 @@ services:
     command: npm run start
     restart: unless-stopped
     environment:
-      - PORT=3000
+      - PORT=3001
       - HOST=http://localhost
       - MONGO_URL=mongodb://api_db:27017/api
     ports:
-    - "3000:3000"
+    - "3001:3001"
     depends_on:
       - api_db
 
@@ -23,11 +34,11 @@ services:
     command: npm run start
     restart: unless-stopped
     environment:
-      - PORT=3005
+      - PORT=3002
       - HOST=http://localhost
       - MONGO_URL=mongodb://auth_db:27017/auth
     ports:
-    - "3005:3005"
+    - "3002:3002"
     depends_on:
       - auth_db
 
