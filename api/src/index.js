@@ -1,6 +1,8 @@
 const express = require('express')
 const mongoose = require('mongoose')
-const {PORT, HOST, db} = require('./configuration')
+const axios = require('axios')
+
+const {PORT, HOST, db, authApiUrl} = require('./configuration')
 const {connectDb} = require('./helpers/db')
 const app = express();
 
@@ -28,13 +30,22 @@ const startServer = () => {
 app.get('/', (req, res) => {
     res.send('Server api work with volumes and dev')
 })
-app.get('/posts', (req, res) => {
+app.get('/api/posts', (req, res) => {
     Post.find(function (err, someAll) {
         if (err) return console.error(err);
         return res.send(`List posts ${someAll}`)
     });
+})
+app.get('/userauth', (req, res)=>{
+    axios.get(authApiUrl+'/currentUser').then(response => {
+        res.json({
+            userAuth: true,
+            currentUserFromAuth: response.data
+        })
+    })
 
 })
+
 
 connectDb()
     .on("error", console.log)

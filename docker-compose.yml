@@ -1,16 +1,16 @@
 version: '3'
 
 services:
+
   frontend:
     build:
-      ./frontend
+      context: ./frontend
+      dockerfile: Dockerfile.prod
     container_name: docker-mern-frontend
-    command: npm run start
+    command: serve -s build -l 3000
     restart: unless-stopped
-    ports:
-    - "3000:3000"
-
-
+    networks:
+      - docker-mern-network
 
   api:
     build:
@@ -20,12 +20,12 @@ services:
     restart: unless-stopped
     environment:
       - PORT=3001
-      - HOST=http://localhost
       - MONGO_URL=mongodb://api_db:27017/api
-    ports:
-    - "3001:3001"
+      - AUTH_API_URL=http://auth:3002/api
     depends_on:
       - api_db
+    networks:
+      - docker-mern-network
 
   auth:
     build:
@@ -35,37 +35,48 @@ services:
     restart: unless-stopped
     environment:
       - PORT=3002
-      - HOST=http://localhost
       - MONGO_URL=mongodb://auth_db:27017/auth
-    ports:
-    - "3002:3002"
+      - API_URL=http://api:3001/api
     depends_on:
       - auth_db
-
+    networks:
+      - docker-mern-network
 
   api_db:
     image: mongo:latest
     container_name: docker-mern-api-db
     volumes:
     - mongodb_api:/data/db
+    networks:
+      - docker-mern-network
 
   auth_db:
     image: mongo:latest
     container_name: docker-mern-auth-db
     volumes:
     - mongodb_auth:/data/db
+    networks:
+      - docker-mern-network
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: docker-mern-nginx
+    ports:
+    - "80:80"
+    volumes:
+    - ./nginx/nginx.conf.prod:/etc/nginx/conf.d/nginx.conf
+    depends_on:
+      - frontend
+      - api
+      - auth
+    networks:
+      - docker-mern-network
 
 volumes:
   mongodb_api:
   mongodb_auth:
 
-
-
-
-
-
-
-
-
-
+networks:
+  docker-mern-network:
+    driver: bridge
 
